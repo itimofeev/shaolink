@@ -15,7 +15,6 @@ type Store struct {
 	db *pg.DB
 }
 
-// "postgresql://postgres:@db:5432/postgres?sslmode=disable"
 func NewStore(connectString string) (*Store, error) {
 	opts, err := pg.ParseURL(connectString)
 	if err != nil {
