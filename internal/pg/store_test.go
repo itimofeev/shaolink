@@ -1,9 +1,13 @@
 package pg
 
 import (
+	"fmt"
+	"math/rand"
+	"testing"
+	"time"
+
 	"github.com/go-pg/pg/v10"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type StoreTestSuite struct {
@@ -16,6 +20,7 @@ func TestStoreSuite(t *testing.T) {
 }
 
 func (s *StoreTestSuite) SetupSuite() {
+	rand.Seed(time.Now().Unix())
 	store, err := NewStore("postgresql://postgres:@db:5432/postgres?sslmode=disable")
 	s.Require().NoError(err)
 
@@ -32,6 +37,23 @@ func (s *StoreTestSuite) TestConnectDB() {
 
 	s.Require().Equal(saved.Key, loaded.Key)
 	s.Require().Equal(saved.Original, loaded.Original)
+}
+
+func (s *StoreTestSuite) TestSaveMultipleRecords() {
+	for i := 0; i < 1000; i++ {
+		_, err := s.store.Save(fmt.Sprintf("http://%s.com/hi/there", randomString(10)))
+		s.Require().NoError(err)
+	}
+
+	shortens, err := s.store.LoadAll()
+	s.Require().NoError(err)
+
+	distribution := make(map[int]int) // count of records in each shard
+	for _, sh := range shortens {
+		distribution[sh.ShardNumber]++
+	}
+
+	fmt.Println("distribution of records by shard number", distribution)
 }
 
 func (s *StoreTestSuite) TestErrOnLoadNotExisted() {
