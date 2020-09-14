@@ -40,7 +40,7 @@ func (s *StoreTestSuite) TestConnectDB() {
 }
 
 func (s *StoreTestSuite) TestSaveMultipleRecords() {
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		_, err := s.store.Save(fmt.Sprintf("http://%s.com/hi/there", randomString(10)))
 		s.Require().NoError(err)
 	}
@@ -57,6 +57,6 @@ func (s *StoreTestSuite) TestSaveMultipleRecords() {
 }
 
 func (s *StoreTestSuite) TestErrOnLoadNotExisted() {
-	_, err := s.store.GetByKey("-1")
+	_, err := s.store.GetByKey("1a")
 	s.Require().EqualError(err, pg.ErrNoRows.Error())
 }
